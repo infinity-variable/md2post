@@ -8,6 +8,7 @@ export default defineConfig({
   base: '/md2post/',
   build: {
     sourcemap: 'hidden',
+    outDir: 'docs',
   },
   plugins: [
     react({
