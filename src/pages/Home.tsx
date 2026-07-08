@@ -24,10 +24,12 @@ export default function Home() {
     const initImages = async () => {
       await loadImages();
       // 检查默认图片是否已存在，不存在则从 public 目录加载
+      // 使用 import.meta.env.BASE_URL 前缀，确保在子路径部署（如 GitHub Pages /md2post/）下也能正确加载
       const images = useStore.getState().images;
+      const base = import.meta.env.BASE_URL;
       const defaultImages: Record<string, string> = {
-        img_cat_qavr: "/default-cat.png",
-        "img_插图_7j65": "/default-insert.png",
+        img_cat_qavr: `${base}default-cat.png`,
+        "img_插图_7j65": `${base}default-insert.png`,
       };
       for (const [ref, url] of Object.entries(defaultImages)) {
         if (!images[ref]) {
