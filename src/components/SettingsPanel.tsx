@@ -9,7 +9,7 @@ import {
   type Theme,
 } from "@/types";
 import { exportSettings, importSettingsFromFile } from "@/lib/settingsIO";
-import { Settings as SettingsIcon, RotateCcw, Minus, Plus, Pencil, Trash2, Save, Download, Upload } from "lucide-react";
+import { Settings as SettingsIcon, RotateCcw, Minus, Plus, Pencil, Trash2, Save, Download, Upload, ChevronDown, ChevronRight } from "lucide-react";
 
 /**
  * 格式化数字显示：整数显示整数，小数去掉尾部 0
@@ -198,22 +198,13 @@ export default function SettingsPanel() {
   const updateCustomTheme = useStore((s) => s.updateCustomTheme);
   const deleteCustomTheme = useStore((s) => s.deleteCustomTheme);
   const importConfig = useStore((s) => s.importConfig);
-  const cleanupImages = useStore((s) => s.cleanupImages);
 
   const [editingTheme, setEditingTheme] = useState<Theme | null>(null);
+  const [showSyntaxHelp, setShowSyntaxHelp] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = () => {
     exportSettings(settings, customThemes);
-  };
-
-  const handleCleanup = async () => {
-    const count = await cleanupImages();
-    if (count > 0) {
-      alert(`已清理 ${count} 张未使用的图片`);
-    } else {
-      alert("没有需要清理的图片");
-    }
   };
 
   const handleImportClick = () => {
@@ -307,14 +298,6 @@ export default function SettingsPanel() {
           >
             <RotateCcw size={12} />
             重置
-          </button>
-          <button
-            onClick={handleCleanup}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-cream hover:text-coral"
-            title="清理未使用的图片缓存"
-          >
-            <Trash2 size={12} />
-            清理
           </button>
           <input
             ref={fileInputRef}
@@ -480,32 +463,43 @@ export default function SettingsPanel() {
 
         {/* 特殊语法说明 */}
         <div className="rounded-lg bg-cream p-2.5">
-          <div className="mb-1.5 text-[11px] font-medium text-ink">特殊语法说明</div>
-          <ul className="space-y-0.5 text-[10px] leading-relaxed text-muted">
-            <li><b className="text-ink">空行</b> 双回车</li>
-            <li><b className="text-ink">正文块</b> %%正文%%</li>
-            <li><b className="text-ink">实线</b> ***</li>
-            <li><b className="text-ink">虚线</b> ---</li>
-            <li><b className="text-ink">图片</b> ![说明|宽度](URL)</li>
-          </ul>
-          <div className="mt-2 flex flex-col gap-1">
-            <a
-              href="https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[10px] text-coral hover:underline"
-            >
-              Markdown 语法参考 →
-            </a>
-            <a
-              href="https://xhslink.com/m/6I6pbFn5aWa"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[10px] text-coral hover:underline"
-            >
-              建议与反馈 →
-            </a>
-          </div>
+          <button
+            onClick={() => setShowSyntaxHelp((v) => !v)}
+            className="mb-1.5 flex items-center gap-1 text-[11px] font-medium text-ink transition-colors hover:text-coral"
+            title={showSyntaxHelp ? "收起特殊语法说明" : "展开特殊语法说明"}
+          >
+            {showSyntaxHelp ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+            特殊语法说明
+          </button>
+          {showSyntaxHelp && (
+            <>
+              <ul className="space-y-0.5 text-[10px] leading-relaxed text-muted">
+                <li><b className="text-ink">空行</b> 双回车</li>
+                <li><b className="text-ink">正文块</b> {"<>正文"}</li>
+                <li><b className="text-ink">实线</b> ***</li>
+                <li><b className="text-ink">虚线</b> ---</li>
+                <li><b className="text-ink">图片</b> ![说明|宽度](URL)</li>
+              </ul>
+              <div className="mt-2 flex flex-col gap-1">
+                <a
+                  href="https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] text-coral hover:underline"
+                >
+                  Markdown 语法参考 →
+                </a>
+                <a
+                  href="https://xhslink.com/m/6I6pbFn5aWa"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] text-coral hover:underline"
+                >
+                  建议与反馈 →
+                </a>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

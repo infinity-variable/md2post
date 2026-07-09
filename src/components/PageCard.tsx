@@ -1,4 +1,4 @@
-import { type CSSProperties, useState, useCallback } from "react";
+import { type CSSProperties, useState, useCallback, forwardRef } from "react";
 import type { Page, Settings } from "@/types";
 import { FONT_OPTIONS } from "@/types";
 import { Download } from "lucide-react";
@@ -7,11 +7,11 @@ interface PageCardProps {
   page: Page;
   settings: Settings;
   total: number;
-  onExportSingle?: (page: Page) => void;
-  onImageWidthChange?: (src: string, width: number, edge: boolean) => void;
+  onExportSingle?: (page: Page, node: HTMLElement) => void;
+  onImageWidthChange?: (src: string, width: number, edge: boolean, center: boolean) => void;
 }
 
-export default function PageCard({ page, settings, total, onExportSingle, onImageWidthChange }: PageCardProps) {
+const PageCard = forwardRef<HTMLDivElement, PageCardProps>(({ page, settings, total, onExportSingle, onImageWidthChange }, ref) => {
   const innerWidth = settings.width - settings.padding * 2;
   const innerHeight = settings.height - settings.padding * 2;
 
@@ -22,6 +22,7 @@ export default function PageCard({ page, settings, total, onExportSingle, onImag
     src: string;
     width: number;
     edge: boolean;
+    center: boolean;
     rect: DOMRect;
   } | null>(null);
 
@@ -31,6 +32,7 @@ export default function PageCard({ page, settings, total, onExportSingle, onImag
     const img = target as HTMLImageElement;
     const currentWidth = parseInt(img.dataset.width || "0") || img.clientWidth;
     const isEdge = img.dataset.edge === "1";
+    const isCenter = img.dataset.center === "1";
     const rect = img.getBoundingClientRect();
     // 使用 data-src（原始引用 @ref 或 URL）而非 img.src（浏览器解析后的 URL）
     const src = img.dataset.src || img.src;
@@ -38,13 +40,14 @@ export default function PageCard({ page, settings, total, onExportSingle, onImag
       src,
       width: currentWidth,
       edge: isEdge,
+      center: isCenter,
       rect,
     });
   }, []);
 
   const handleWidthConfirm = () => {
     if (editingImg && onImageWidthChange) {
-      onImageWidthChange(editingImg.src, editingImg.width, editingImg.edge);
+      onImageWidthChange(editingImg.src, editingImg.width, editingImg.edge, editingImg.center);
     }
     setEditingImg(null);
   };
@@ -97,7 +100,7 @@ export default function PageCard({ page, settings, total, onExportSingle, onImag
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <div style={pageStyle} className="page-card">
+      <div ref={ref} style={pageStyle} className="page-card">
         <div
           className={`page-content${hasEdgeImage ? " allow-edge" : ""}`}
           style={{ ...contentStyle, ...cssVars }}
@@ -134,7 +137,11 @@ export default function PageCard({ page, settings, total, onExportSingle, onImag
         </span>
         {onExportSingle && (
           <button
-            onClick={() => onExportSingle(page)}
+            onClick={(e) => {
+              const pageCardEl = (e.currentTarget.closest('.flex.flex-col.items-center') as HTMLElement)
+                ?.querySelector('.page-card') as HTMLElement;
+              if (pageCardEl) onExportSingle(page, pageCardEl);
+            }}
             className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-cream hover:text-coral"
             title="导出此页"
           >
@@ -185,10 +192,19 @@ export default function PageCard({ page, settings, total, onExportSingle, onImag
               <input
                 type="checkbox"
                 checked={editingImg.edge}
-                onChange={(e) => setEditingImg((prev) => prev ? { ...prev, edge: e.target.checked } : null)}
+                onChange={(e) => setEditingImg((prev) => prev ? { ...prev, edge: e.target.checked, center: false } : null)}
                 className="h-3 w-3 accent-coral"
               />
               突破页边距（铺满页面宽度）
+            </label>
+            <label className="mt-1 flex items-center gap-1.5 text-[11px] text-muted">
+              <input
+                type="checkbox"
+                checked={editingImg.center}
+                onChange={(e) => setEditingImg((prev) => prev ? { ...prev, center: e.target.checked, edge: false } : null)}
+                className="h-3 w-3 accent-coral"
+              />
+              居中（保留页边距水平居中）
             </label>
             <div className="mt-2 flex justify-end gap-2">
               <button onClick={handleWidthCancel} className="rounded-md px-3 py-1 text-xs text-muted hover:bg-cream">取消</button>
@@ -199,4 +215,8 @@ export default function PageCard({ page, settings, total, onExportSingle, onImag
       )}
     </div>
   );
-}
+});
+
+PageCard.displayName = "PageCard";
+
+export default PageCard;

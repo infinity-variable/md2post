@@ -1,19 +1,9 @@
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import type { Page, Settings } from "@/types";
 import PageCard from "./PageCard";
-import { exportSinglePage } from "@/lib/exporter";
+import { exportSinglePage, exportPagesAsZip } from "@/lib/exporter";
 import { useStore } from "@/store";
 import { Loader2 } from "lucide-react";
-
-/**
- * 在 images 映射中根据 data URL 反向查找 ref
- */
-function findRefBySrc(images: Record<string, string>, src: string): string | null {
-  for (const [ref, dataUrl] of Object.entries(images)) {
-    if (dataUrl === src) return ref;
-  }
-  return null;
-}
 
 interface PreviewProps {
   pages: Page[];
@@ -25,12 +15,35 @@ export default function Preview({ pages, settings }: PreviewProps) {
   const setContent = useStore((s) => s.setContent);
   const content = useStore((s) => s.content);
   const images = useStore((s) => s.images);
+  const isExporting = useStore((s) => s.isExporting);
+  const setIsExporting = useStore((s) => s.setIsExporting);
+  const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
 
-  const handleExportSingle = async (page: Page) => {
+  // 存储每个 PageCard 的 DOM ref
+  const pageRefs = useRef<Map<number, HTMLElement>>(new Map());
+
+  // 监听 store 中的导出请求
+  const exportRequest = useStore((s) => s.exportRequest);
+
+  const setRefForPage = useCallback((pageIndex: number, node: HTMLDivElement | null) => {
+    if (node) {
+      pageRefs.current.set(pageIndex, node);
+    } else {
+      pageRefs.current.delete(pageIndex);
+    }
+  }, []);
+
+  // 当 exportRequest 变化时触发导出全部
+  useEffect(() => {
+    if (exportRequest === 0) return;
+    handleExportAll();
+  }, [exportRequest]);
+
+  const handleExportSingle = async (page: Page, node: HTMLElement) => {
     if (exportingIndex !== null) return;
     setExportingIndex(page.index);
     try {
-      await exportSinglePage(page, settings);
+      await exportSinglePage(node, settings, page.index);
     } catch (err) {
       console.error("导出失败:", err);
       alert("导出失败，请重试");
@@ -39,12 +52,42 @@ export default function Preview({ pages, settings }: PreviewProps) {
     }
   };
 
+  const handleExportAll = async () => {
+    if (isExporting) return;
+    // 按页码顺序收集 DOM 节点
+    const nodes = pages
+      .map(p => pageRefs.current.get(p.index))
+      .filter((n): n is HTMLElement => n != null);
+
+    if (nodes.length !== pages.length) {
+      alert("部分页面尚未渲染，请稍后重试");
+      return;
+    }
+
+    setIsExporting(true);
+    setProgress({ current: 0, total: pages.length });
+    try {
+      await exportPagesAsZip(nodes, settings, (current, total) => {
+        setProgress({ current, total });
+      });
+    } catch (err) {
+      console.error("导出失败:", err);
+      const msg = err instanceof Error && err.message.includes("超时")
+        ? "导出超时，请尝试减少内容或刷新页面后重试"
+        : "导出失败，请重试";
+      alert(msg);
+    } finally {
+      setIsExporting(false);
+      setProgress(null);
+    }
+  };
+
   /**
    * 点击图片调整后，更新 markdown 源码中对应图片的宽度和 edge 标记
    * data-src 保存原始引用（@ref 或 URL），用于匹配更新
    */
-  const handleImageWidthChange = (src: string, newWidth: number, edge: boolean) => {
-    const suffix = edge ? `|${newWidth}|edge` : `|${newWidth}`;
+  const handleImageWidthChange = (src: string, newWidth: number, edge: boolean, center: boolean) => {
+    const suffix = edge ? `|${newWidth}|edge` : center ? `|${newWidth}|center` : `|${newWidth}`;
 
     // 如果 src 是 @ref 格式，直接匹配替换
     if (src.startsWith("@")) {
@@ -115,6 +158,7 @@ export default function Preview({ pages, settings }: PreviewProps) {
         {pages.map((page) => (
           <PageCard
             key={page.index}
+            ref={(node) => setRefForPage(page.index, node)}
             page={page}
             settings={settings}
             total={pages.length}

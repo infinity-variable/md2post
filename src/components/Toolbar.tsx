@@ -1,37 +1,21 @@
 import { useStore } from "@/store";
-import { exportPagesAsZip } from "@/lib/exporter";
-import type { Page, Settings } from "@/types";
-import { Download, Loader2 } from "lucide-react";
-import { useState } from "react";
+import type { Page } from "@/types";
+import { Download, Loader2, Upload } from "lucide-react";
+
+const APP_VERSION = __APP_VERSION__;
 
 interface ToolbarProps {
   pages: Page[];
-  settings: Settings;
 }
 
-export default function Toolbar({ pages, settings }: ToolbarProps) {
+export default function Toolbar({ pages }: ToolbarProps) {
   const isExporting = useStore((s) => s.isExporting);
   const setIsExporting = useStore((s) => s.setIsExporting);
-  const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
+  const requestExport = useStore((s) => s.requestExport);
 
-  const handleExportAll = async () => {
+  const handleExportAll = () => {
     if (isExporting) return;
-    setIsExporting(true);
-    setProgress({ current: 0, total: pages.length });
-    try {
-      await exportPagesAsZip(pages, settings, (current, total) => {
-        setProgress({ current, total });
-      });
-    } catch (err) {
-      console.error("导出失败:", err);
-      const msg = err instanceof Error && err.message.includes("超时")
-        ? "导出超时，请尝试减少内容或刷新页面后重试"
-        : "导出失败，请重试";
-      alert(msg);
-    } finally {
-      setIsExporting(false);
-      setProgress(null);
-    }
+    requestExport();
   };
 
   return (
@@ -44,7 +28,7 @@ export default function Toolbar({ pages, settings }: ToolbarProps) {
         </div>
         <div>
           <h1 className="font-serif text-base font-bold leading-tight text-ink">MD2Post</h1>
-          <p className="text-[10px] leading-tight text-muted">Markdown 转小红书图文</p>
+          <p className="text-[10px] leading-tight text-muted">Markdown 转小红书图文 · v{APP_VERSION}</p>
         </div>
       </div>
 
@@ -54,6 +38,16 @@ export default function Toolbar({ pages, settings }: ToolbarProps) {
           <span className="text-xs text-muted">页</span>
         </div>
 
+        <a
+          href="https://creator.xiaohongshu.com/publish/publish?from=tab_switch&target=image"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-ink shadow-sm transition-all hover:bg-cream hover:shadow-md"
+        >
+          <Upload size={14} />
+          上传小红书
+        </a>
+
         <button
           onClick={handleExportAll}
           disabled={isExporting || pages.length === 0}
@@ -62,7 +56,7 @@ export default function Toolbar({ pages, settings }: ToolbarProps) {
           {isExporting ? (
             <>
               <Loader2 size={14} className="animate-spin" />
-              {progress ? `导出中 ${progress.current}/${progress.total}` : "导出中..."}
+              导出中...
             </>
           ) : (
             <>

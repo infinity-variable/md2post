@@ -17,8 +17,10 @@ function getMeasureElement(settings: Settings): HTMLDivElement {
   measureEl.style.setProperty("--font-size", `${settings.fontSize}px`);
   measureEl.style.setProperty("--line-height", String(settings.lineHeight));
   measureEl.style.setProperty("--paragraph-spacing", `${settings.paragraphSpacing}px`);
+  measureEl.style.setProperty("--letter-spacing", `${settings.letterSpacing}px`);
   measureEl.style.setProperty("--h1-font-size", `${settings.h1FontSize}px`);
   measureEl.style.setProperty("--h2-font-size", `${settings.h2FontSize}px`);
+  measureEl.style.setProperty("--h3-font-size", `${settings.h3FontSize}px`);
   measureEl.style.setProperty("--page-padding", `${settings.padding}px`);
   measureEl.style.setProperty("--font-family", (FONT_OPTIONS[settings.fontFamily] ?? FONT_OPTIONS.sans).value);
   measureEl.style.setProperty("--font-weight", String((FONT_OPTIONS[settings.fontFamily] ?? FONT_OPTIONS.sans).weight));
@@ -27,17 +29,38 @@ function getMeasureElement(settings: Settings): HTMLDivElement {
   measureEl.style.setProperty("--heading-color", settings.headingColor ?? settings.textColor);
   measureEl.style.setProperty("--underline-color", settings.underlineColor);
   measureEl.style.setProperty("--highlight-color", settings.highlightColor);
+  measureEl.style.setProperty("--code-color", settings.codeColor ?? "#C0392B");
+  measureEl.style.setProperty("--code-bg-color", settings.codeBgColor ?? "#F0EDE5");
   measureEl.style.width = `${innerWidth}px`;
   measureEl.style.padding = "0";
   return measureEl;
 }
 
 /**
- * 测量单个块 HTML 在给定设置下的高度
+ * 等待容器内所有图片加载完成
+ * data URL 图片也需要时间解码，否则 naturalWidth/naturalHeight 为 0
  */
-function measureBlock(html: string, settings: Settings): number {
+function awaitMeasureImages(el: HTMLElement): Promise<void> {
+  const imgs = Array.from(el.querySelectorAll("img"));
+  if (imgs.length === 0) return Promise.resolve();
+  return Promise.all(
+    imgs.map((img) => {
+      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+      return new Promise<void>((resolve) => {
+        img.addEventListener("load", () => resolve(), { once: true });
+        img.addEventListener("error", () => resolve(), { once: true });
+      });
+    })
+  ).then(() => undefined);
+}
+
+/**
+ * 测量单个块 HTML 在给定设置下的高度（等待图片加载后）
+ */
+async function measureBlock(html: string, settings: Settings): Promise<number> {
   const el = getMeasureElement(settings);
   el.innerHTML = html;
+  await awaitMeasureImages(el);
   const height = el.scrollHeight;
   el.innerHTML = "";
   return height;
@@ -48,11 +71,11 @@ function measureBlock(html: string, settings: Settings): number {
  * 适用于 ul/ol（按 li 拆）、blockquote/table（按行拆）
  * 如果无法拆分，返回原块（即使超出页面高度）
  */
-function splitOversizedBlock(
+async function splitOversizedBlock(
   html: string,
   settings: Settings,
   availableHeight: number
-): string[] {
+): Promise<string[]> {
   const template = document.createElement("template");
   template.innerHTML = html.trim();
   const root = template.content.firstElementChild as HTMLElement | null;
@@ -73,9 +96,8 @@ function splitOversizedBlock(
         .concat(item)
         .map((i) => i.outerHTML)
         .join("")}</${wrapperTag}>`;
-      const h = measureBlock(testHtml, settings);
+      const h = await measureBlock(testHtml, settings);
       if (h > availableHeight && currentItems.length > 0) {
-        // 当前项放不下，先保存已有
         parts.push(
           `<${wrapperTag}>${currentItems
             .map((i) => i.outerHTML)
@@ -111,7 +133,7 @@ function splitOversizedBlock(
         .concat(row)
         .map((r) => r.outerHTML)
         .join("")}</tbody></table>`;
-      const h = measureBlock(testHtml, settings);
+      const h = await measureBlock(testHtml, settings);
       if (h > availableHeight && currentRows.length > 0) {
         parts.push(
           `<table><tbody>${currentRows
@@ -145,7 +167,7 @@ function splitOversizedBlock(
         .concat(p)
         .map((x) => x.outerHTML)
         .join("")}</blockquote>`;
-      const h = measureBlock(testHtml, settings);
+      const h = await measureBlock(testHtml, settings);
       if (h > availableHeight && currentP.length > 0) {
         parts.push(
           `<blockquote>${currentP
@@ -174,10 +196,10 @@ function splitOversizedBlock(
 /**
  * 将块级 HTML 数组按页面高度切割为多页
  */
-export function paginateBlocks(
+export async function paginateBlocks(
   blocks: string[],
   settings: Settings
-): Page[] {
+): Promise<Page[]> {
   const availableHeight = settings.height - settings.padding * 2;
   if (availableHeight <= 0) {
     return [{ index: 1, html: blocks.join("") }];
@@ -196,13 +218,13 @@ export function paginateBlocks(
   };
 
   for (const block of blocks) {
-    const blockHeight = measureBlock(block, settings);
+    const blockHeight = await measureBlock(block, settings);
 
     // 块本身超出整页可用高度 → 尝试拆分
     if (blockHeight > availableHeight) {
-      const parts = splitOversizedBlock(block, settings, availableHeight);
+      const parts = await splitOversizedBlock(block, settings, availableHeight);
       for (const part of parts) {
-        const partHeight = measureBlock(part, settings);
+        const partHeight = await measureBlock(part, settings);
         if (currentHeight + partHeight > availableHeight && currentPage.length > 0) {
           flushPage();
         }

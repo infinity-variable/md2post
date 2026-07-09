@@ -10,12 +10,13 @@ import {
   SIZE_PRESETS,
 } from "@/types";
 import { persist } from "zustand/middleware";
-import { saveImageToStore, loadImageStore, cleanupUnusedImages } from "@/lib/imageStore";
+import { saveImageToStore, loadImageStore, cleanupUnusedImages, deleteImageFromStore } from "@/lib/imageStore";
 
 interface StoreState {
   content: string;
   settings: Settings;
   isExporting: boolean;
+  exportRequest: number; // 递增触发导出全部
   images: Record<string, string>;
   customThemes: Theme[];
   // undo/redo
@@ -26,6 +27,7 @@ interface StoreState {
   setSettings: (partial: Partial<Settings>) => void;
   setSizePreset: (preset: SizePreset) => void;
   setIsExporting: (v: boolean) => void;
+  requestExport: () => void;
   resetSettings: () => void;
   addImage: (ref: string, dataUrl: string) => void;
   applyTheme: (theme: Theme) => void;
@@ -37,6 +39,7 @@ interface StoreState {
   redo: () => void;
   loadImages: () => Promise<void>;
   cleanupImages: () => Promise<number>;
+  deleteImages: (refs: string[]) => Promise<void>;
 }
 
 export const useStore = create<StoreState>()(
@@ -45,6 +48,7 @@ export const useStore = create<StoreState>()(
       content: DEFAULT_CONTENT,
       settings: DEFAULT_SETTINGS,
       isExporting: false,
+      exportRequest: 0,
       images: {},
       customThemes: [],
       undoStack: [],
@@ -71,6 +75,7 @@ export const useStore = create<StoreState>()(
         })),
 
       setIsExporting: (v) => set({ isExporting: v }),
+      requestExport: () => set((state) => ({ exportRequest: state.exportRequest + 1 })),
       resetSettings: () => set({ settings: DEFAULT_SETTINGS }),
 
       addImage: (ref, dataUrl) => {
@@ -170,10 +175,27 @@ export const useStore = create<StoreState>()(
           return 0;
         }
       },
+
+      // 删除指定图片（从 IndexedDB 和内存）
+      deleteImages: async (refs) => {
+        for (const ref of refs) {
+          try {
+            await deleteImageFromStore(ref);
+          } catch (err) {
+            console.error("删除图片失败:", err);
+          }
+        }
+        set((state) => {
+          const newImages = { ...state.images };
+          for (const ref of refs) delete newImages[ref];
+          return { images: newImages };
+        });
+      },
     }),
     {
       name: "md2post-store",
       // images 不再存入 localStorage，改用 IndexedDB
+      // isExporting/exportRequest 也不持久化
       partialize: (state) => ({
         content: state.content,
         settings: state.settings,

@@ -156,7 +156,7 @@ body {
   margin: 0;
 }
 
-/* %%正文%%：竖线前缀的正文块，样式同引用但颜色为主文本色 */
+/* <>正文：竖线前缀的正文块，样式同引用但颜色为主文本色 */
 .page-content .note-text {
   display: inline-block;
   padding-left: 14px;
@@ -278,6 +278,12 @@ body {
   margin-left: calc(-1 * var(--page-padding));
   margin-right: calc(-1 * var(--page-padding));
   display: block;
+}
+/* 图片居中：保留页边距，水平居中 */
+.page-content img.img-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 /* 父容器允许横向溢出，保持纵向裁剪（使用 clip-path 代替 overflow） */
 .page-content.allow-edge {

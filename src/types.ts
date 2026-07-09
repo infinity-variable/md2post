@@ -130,12 +130,13 @@ export const SIZE_PRESETS: Record<SizePreset, { width: number; height: number; l
   "3:5": { width: 440, height: 733, label: "3:5 · 440×733" },
 };
 
-// 默认设置（使用素雅白主题）
+// 默认设置（使用素雅白主题，首次打开为 3:5 并显示辅助线）
 export const DEFAULT_SETTINGS: Settings = {
-  sizePreset: "3:4",
+  sizePreset: "3:5",
   width: 440,
-  height: 586,
+  height: 733,
   ...BUILT_IN_THEMES[0].settings,
+  showGuideLines: true,
 };
 
 /**
@@ -153,7 +154,7 @@ export function migrateSettings(stored: Record<string, unknown>): Settings {
   }
   // showGuideLines 缺失时补默认值
   if (s.showGuideLines === undefined) {
-    s.showGuideLines = false;
+    s.showGuideLines = true;
   }
   // codeColor/codeBgColor 缺失时补默认值
   if (s.codeColor === undefined) {
@@ -175,7 +176,7 @@ export const DEFAULT_CONTENT = `<br>
 # 快速上手Markdown
 <br>
 
-%%作者：自变量Amber%%
+<>作者：自变量Amber
 
 <br>
 
@@ -281,11 +282,11 @@ Markdown 是一种轻量级排版语言。
 
 ### 正文块
 \`\`\`markdown
-%%这是一段正文块。%%
+<>这是一段正文块。
 \`\`\`
 
 效果：
-%% 这是一段正文块。%%
+<> 这是一段正文块。
 
 <br>
 
@@ -340,4 +341,22 @@ function hello() {
 
 ## 写在最后
 部分为本工具特殊语法，标记在设置栏最下方。
+`;
+
+// 模板二：标题框架
+export const TEMPLATE_TWO = `<br>
+
+# 快速上手Markdown
+
+
+***
+
+<br>
+
+## 标题一
+正文balabala
+## 标题二
+正文balabala
+## 标题三
+正文balabala
 `;

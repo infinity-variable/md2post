@@ -7,6 +7,7 @@ import { useDebounced } from "@/hooks/useDebounced";
 import { usePagination } from "@/hooks/usePagination";
 import { useStore } from "@/store";
 import { saveImageToStore } from "@/lib/imageStore";
+import { processImageFiles } from "@/lib/imageInsert";
 
 const DEFAULT_LEFT_WIDTH = 360;
 const DEFAULT_RIGHT_WIDTH = 280;
@@ -14,11 +15,23 @@ const MIN_PANEL_WIDTH = 220;
 const MAX_LEFT_WIDTH = 600;
 const MAX_RIGHT_WIDTH = 400;
 
+/** 判断是否为可导入的文本文件（.md/.markdown/.txt） */
+function isTextFile(f: File): boolean {
+  const name = f.name.toLowerCase();
+  if (name.endsWith(".md") || name.endsWith(".markdown") || name.endsWith(".txt")) return true;
+  const t = f.type;
+  if (t === "text/markdown" || t === "text/plain") return true;
+  return false;
+}
+
 export default function Home() {
   const content = useStore((s) => s.content);
   const settings = useStore((s) => s.settings);
   const loadImages = useStore((s) => s.loadImages);
+  const setContent = useStore((s) => s.setContent);
   const [imagesReady, setImagesReady] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const dragCounter = useRef(0);
 
   // 启动时从 IndexedDB 加载图片，并预加载默认图片（如果需要）
   // 完成后才标记 imagesReady=true，避免首次渲染时 images 为空导致 404
@@ -110,13 +123,79 @@ export default function Home() {
     document.body.classList.remove("cursor-col-resize");
   }, []);
 
+  /* ── 全局拖拽：文本 / 图片 ── */
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current++;
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    dragCounter.current--;
+    if (dragCounter.current <= 0) {
+      dragCounter.current = 0;
+      setIsDragOver(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current = 0;
+    setIsDragOver(false);
+    const files = Array.from(e.dataTransfer?.files ?? []);
+    if (files.length === 0) return;
+
+    const textFiles: File[] = [];
+    const imageFiles: File[] = [];
+    const unsupported: string[] = [];
+    for (const f of files) {
+      if (isTextFile(f)) textFiles.push(f);
+      else if (f.type.startsWith("image/")) imageFiles.push(f);
+      else unsupported.push(f.name);
+    }
+
+    if (unsupported.length > 0) {
+      alert(`不支持的文件类型：\n${unsupported.join("\n")}\n\n仅支持 .md / .txt 文本和图片文件。`);
+      return;
+    }
+
+    // 文本：编辑器空白则直接写入，否则确认覆盖
+    if (textFiles.length > 0) {
+      const texts: string[] = [];
+      for (const f of textFiles) {
+        try { texts.push(await f.text()); } catch { /* 忽略读取失败 */ }
+      }
+      const text = texts.join("\n\n");
+      const current = useStore.getState().content;
+      if (current.trim() === "") {
+        setContent(text);
+      } else if (confirm("编辑器中已有内容，是否用拖入的文本覆盖？")) {
+        setContent(text);
+      }
+    }
+
+    // 图片：走统一插入流程（占位符 → 选区 → 光标行 → 文末）
+    if (imageFiles.length > 0) {
+      await processImageFiles(imageFiles);
+    }
+  }, [setContent]);
+
   return (
     <div className="flex h-full flex-col"
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
     >
-      <Toolbar pages={pages} settings={settings} />
+      <Toolbar pages={pages} />
       <div className="flex min-h-0 flex-1">
         {/* 左侧编辑器 */}
         <aside style={{ width: leftWidth }} className="shrink-0 border-r border-border overflow-hidden">
@@ -145,6 +224,15 @@ export default function Home() {
           <SettingsPanel />
         </aside>
       </div>
+
+      {isDragOver && (
+        <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-coral/10">
+          <div className="rounded-xl border-2 border-dashed border-coral bg-card/90 px-8 py-6 text-center shadow-lg">
+            <div className="font-serif text-base font-semibold text-coral">松开以插入</div>
+            <div className="mt-1 text-xs text-muted">文本 / 图片</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
