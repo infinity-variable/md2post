@@ -1,7 +1,7 @@
 import { useStore } from "@/store";
 import { exportPagesAsZip } from "@/lib/exporter";
 import type { Page, Settings } from "@/types";
-import { Download, Loader2, Layers } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 interface ToolbarProps {
@@ -38,7 +38,14 @@ export default function Toolbar({ pages, settings }: ToolbarProps) {
     <header className="flex h-14 items-center justify-between border-b border-border bg-card px-5">
       <div className="flex items-center gap-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-coral text-white shadow-sm">
-          <Layers size={16} />
+          <svg width="16" height="16" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M10 44H38C39.1046 44 40 43.1046 40 42V14H30V4H10C8.89543 4 8 4.89543 8 6V42C8 43.1046 8.89543 44 10 44Z" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M30 4L40 14" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17 25L31 25" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17 31L31 31" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M31 25L26 20" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 36L17 31" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
         <div>
           <h1 className="font-serif text-base font-bold leading-tight text-ink">MD2Post</h1>
