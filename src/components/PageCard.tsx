@@ -113,7 +113,7 @@ export default function PageCard({ page, settings, total, onExportSingle, onImag
               style={{
                 top: 73,
                 height: 1,
-                background: "repeating-linear-gradient(90deg, #FF4D4F 0, #FF4D4F 4px, transparent 4px, transparent 8px)",
+                background: `repeating-linear-gradient(90deg, var(--color-coral) 0, var(--color-coral) 4px, transparent 4px, transparent 8px)`,
               }}
             />
             {/* 底部辅助线：距离底部 73px */}
@@ -122,7 +122,7 @@ export default function PageCard({ page, settings, total, onExportSingle, onImag
               style={{
                 bottom: 73,
                 height: 1,
-                background: "repeating-linear-gradient(90deg, #FF4D4F 0, #FF4D4F 4px, transparent 4px, transparent 8px)",
+                background: `repeating-linear-gradient(90deg, var(--color-coral) 0, var(--color-coral) 4px, transparent 4px, transparent 8px)`,
               }}
             />
           </>
@@ -173,7 +173,7 @@ export default function PageCard({ page, settings, total, onExportSingle, onImag
                   if (!isNaN(v) && v > 0)
                     setEditingImg((prev) => prev ? { ...prev, width: v } : null);
                 }}
-                className="h-7 w-16 rounded border border-border bg-white px-2 text-center font-mono text-xs text-ink outline-none focus:border-coral"
+                className="h-7 w-16 rounded border border-border bg-card px-2 text-center font-mono text-xs text-ink outline-none focus:border-coral"
               />
               <span className="text-[10px] text-muted">px</span>
               <button

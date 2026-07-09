@@ -11,7 +11,6 @@
     "check": "tsc -b --noEmit"
   },
   "dependencies": {
-    "clsx": "^2.1.1",
     "file-saver": "^2.0.5",
     "html-to-image": "^1.11.13",
     "jszip": "^3.10.1",
@@ -20,7 +19,6 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.3.0",
-    "tailwind-merge": "^3.0.2",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 :root {
+  /* 语义色变量，供 inline style 引用 */
+  --color-coral: theme("colors.coral");
+  --color-coral-dark: theme("colors.coralDark");
+
   font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -21,8 +25,8 @@ body,
 }
 
 body {
-  background-color: #faf7f2;
-  color: #1a1a1a;
+  background-color: theme("colors.cream");
+  color: theme("colors.ink");
 }
 
 /* 自定义滚动条 */
@@ -34,11 +38,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d6d1c6;
+  background: theme("colors.scrollbarThumb");
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #b8b2a4;
+  background: theme("colors.mutedLight");
 }
 
 /* 编辑器文本域 */
@@ -47,7 +51,7 @@ body {
   tab-size: 2;
 }
 .editor-textarea::placeholder {
-  color: #b8b2a4;
+  color: theme("colors.muted");
 }
 
 /* 拖拽分割条 */
@@ -61,7 +65,7 @@ body {
 }
 .resize-handle:hover,
 .resize-handle.active {
-  background: #ff4d4f33;
+  background: theme("colors.coral / 20%");
 }
 .resize-handle::after {
   content: "";
@@ -71,8 +75,8 @@ body {
   transform: translate(-50%, -50%);
   width: 2px;
   height: 24px;
-  border-left: 1px dotted #b8b2a4;
-  border-right: 1px dotted #b8b2a4;
+  border-left: 1px dotted theme("colors.mutedLight");
+  border-right: 1px dotted theme("colors.mutedLight");
   opacity: 0;
   transition: opacity 0.15s;
 }

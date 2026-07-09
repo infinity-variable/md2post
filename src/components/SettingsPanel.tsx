@@ -75,7 +75,7 @@ function NumRow({ label, value, min, max, step, unit = "", decimals = 1, emptyFa
       <span className="w-16 shrink-0 text-[11px] text-muted">{label}</span>
       <button
         onClick={() => adjust(-step)}
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border bg-white text-muted transition hover:border-coral/40 hover:text-coral"
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border bg-card text-muted transition hover:border-coral/40 hover:text-coral"
       >
         <Minus size={10} />
       </button>
@@ -90,7 +90,7 @@ function NumRow({ label, value, min, max, step, unit = "", decimals = 1, emptyFa
             setFocused(false);
             commit(e.target.value);
           }}
-          className="h-6 w-full rounded border border-border bg-white pr-6 text-center font-mono text-[11px] text-ink outline-none focus:border-coral"
+          className="h-6 w-full rounded border border-border bg-card pr-6 text-center font-mono text-[11px] text-ink outline-none focus:border-coral"
         />
         {unit && (
           <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-muted">
@@ -100,7 +100,7 @@ function NumRow({ label, value, min, max, step, unit = "", decimals = 1, emptyFa
       </div>
       <button
         onClick={() => adjust(step)}
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border bg-white text-muted transition hover:border-coral/40 hover:text-coral"
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border bg-card text-muted transition hover:border-coral/40 hover:text-coral"
       >
         <Plus size={10} />
       </button>
@@ -135,7 +135,7 @@ function ColorRow({ label, value, onChange }: ColorRowProps) {
         value={value}
         onChange={handleInput}
         style={{ width: inputWidth }}
-        className="h-6 rounded border border-border bg-white px-2 font-mono text-[11px] uppercase text-ink outline-none focus:border-coral"
+        className="h-6 rounded border border-border bg-card px-2 font-mono text-[11px] uppercase text-ink outline-none focus:border-coral"
         maxLength={7}
       />
     </div>
@@ -165,7 +165,7 @@ function ThemeEditor({
               type="text"
               value={draft.name}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-              className="h-6 flex-1 rounded border border-border bg-white px-2 text-[11px] text-ink outline-none focus:border-coral"
+              className="h-6 flex-1 rounded border border-border bg-card px-2 text-[11px] text-ink outline-none focus:border-coral"
             />
           </div>
           <ColorRow label="主文本" value={draft.settings.textColor} onChange={(v) => setDraft({ ...draft, settings: { ...draft.settings, textColor: v } })} />
@@ -339,7 +339,7 @@ export default function SettingsPanel() {
                   onClick={() => setSizePreset(p)}
                   className={
                     "rounded-lg border px-2 py-2 text-center transition-all " +
-                    (active ? "border-coral bg-coral/5 text-ink shadow-sm" : "border-border bg-white text-muted hover:border-coral/40 hover:text-ink")
+                    (active ? "border-coral bg-coral/5 text-ink shadow-sm" : "border-border bg-card text-muted hover:border-coral/40 hover:text-ink")
                   }
                 >
                   <div className="font-serif text-sm font-semibold">{p}</div>
@@ -350,7 +350,7 @@ export default function SettingsPanel() {
           </div>
           {/* 辅助线开关（仅 3:5 尺寸时显示） */}
           {settings.sizePreset === "3:5" && (
-            <label className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-white px-2 py-1.5 text-[11px] text-muted transition hover:border-coral/40">
+            <label className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card px-2 py-1.5 text-[11px] text-muted transition hover:border-coral/40">
               <input
                 type="checkbox"
                 checked={settings.showGuideLines}
@@ -386,7 +386,7 @@ export default function SettingsPanel() {
                     onClick={() => applyTheme(t)}
                     className={
                       "flex items-center gap-1.5 rounded-lg border px-2 py-1.5 transition-all " +
-                      (active ? "border-coral bg-coral/5 shadow-sm" : "border-border bg-white hover:border-coral/40")
+                      (active ? "border-coral bg-coral/5 shadow-sm" : "border-border bg-card hover:border-coral/40")
                     }
                   >
                     <div className="flex gap-0.5">
@@ -435,7 +435,7 @@ export default function SettingsPanel() {
                   onClick={() => setSettings({ fontFamily: f })}
                   className={
                     "flex h-7 items-center justify-center rounded-lg border px-1.5 text-center transition-all " +
-                    (active ? "border-coral bg-coral/5 text-ink shadow-sm" : "border-border bg-white text-muted hover:border-coral/40 hover:text-ink")
+                    (active ? "border-coral bg-coral/5 text-ink shadow-sm" : "border-border bg-card text-muted hover:border-coral/40 hover:text-ink")
                   }
                   style={{ fontFamily: (FONT_OPTIONS[f] ?? FONT_OPTIONS.sans).value }}
                 >
@@ -480,7 +480,7 @@ export default function SettingsPanel() {
 
         {/* 特殊语法说明 */}
         <div className="rounded-lg bg-cream p-2.5">
-          <div className="mb-1.5 text-[11px] font-medium text-ink">语法说明</div>
+          <div className="mb-1.5 text-[11px] font-medium text-ink">特殊语法说明</div>
           <ul className="space-y-0.5 text-[10px] leading-relaxed text-muted">
             <li><b className="text-ink">空行</b> 双回车</li>
             <li><b className="text-ink">正文块</b> %%正文%%</li>

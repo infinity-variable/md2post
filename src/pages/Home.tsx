@@ -18,13 +18,13 @@ export default function Home() {
   const content = useStore((s) => s.content);
   const settings = useStore((s) => s.settings);
   const loadImages = useStore((s) => s.loadImages);
+  const [imagesReady, setImagesReady] = useState(false);
 
   // 启动时从 IndexedDB 加载图片，并预加载默认图片（如果需要）
+  // 完成后才标记 imagesReady=true，避免首次渲染时 images 为空导致 404
   useEffect(() => {
     const initImages = async () => {
       await loadImages();
-      // 检查默认图片是否已存在，不存在则从 public 目录加载
-      // 使用 import.meta.env.BASE_URL 前缀，确保在子路径部署（如 GitHub Pages /md2post/）下也能正确加载
       const images = useStore.getState().images;
       const base = import.meta.env.BASE_URL;
       const defaultImages: Record<string, string> = {
@@ -42,7 +42,6 @@ export default function Home() {
               reader.readAsDataURL(blob);
             });
             await saveImageToStore(ref, dataUrl);
-            // 更新内存中的 images
             useStore.setState((state) => ({
               images: { ...state.images, [ref]: dataUrl },
             }));
@@ -51,6 +50,7 @@ export default function Home() {
           }
         }
       }
+      setImagesReady(true);
     };
     initImages();
   }, [loadImages]);
@@ -76,7 +76,8 @@ export default function Home() {
   const startWidthRef = useRef(0);
 
   // 对内容防抖 120ms，避免频繁输入时重复计算分页，同时保持实时感
-  const debouncedContent = useDebounced(content, 120);
+  // 图片未就绪时传空内容，避免 @ref 找不到映射而产生 404
+  const debouncedContent = useDebounced(imagesReady ? content : "", 120);
   const pages = usePagination(debouncedContent, settings);
 
   const handleMouseDown = useCallback((side: "left" | "right") => (e: React.MouseEvent) => {

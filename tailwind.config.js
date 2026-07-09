@@ -11,11 +11,13 @@ export default {
       colors: {
         cream: "#FAF7F2",
         ink: "#1A1A1A",
-        coral: "#FF4D4F",
+        coral: "#ff4d4f",
         coralDark: "#E63946",
         border: "#E8E4DC",
         card: "#FFFFFF",
         muted: "#6B6B6B",
+        mutedLight: "#B8B2A4",
+        scrollbarThumb: "#D6D1C6",
       },
       fontFamily: {
         serif: ['"Noto Serif SC"', "serif"],
