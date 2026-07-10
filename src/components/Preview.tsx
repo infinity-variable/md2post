@@ -145,7 +145,7 @@ export default function Preview({ pages, settings }: PreviewProps) {
     return (
       <div className="flex h-full items-center justify-center text-muted">
         <div className="text-center">
-          <Loader2 className="mx-auto mb-2 animate-spin text-coral" size={24} />
+          <Loader2 className="mx-auto mb-2 animate-spin text-burgundy" size={24} />
           <p className="text-sm">渲染中...</p>
         </div>
       </div>

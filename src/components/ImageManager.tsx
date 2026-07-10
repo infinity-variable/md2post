@@ -104,7 +104,7 @@ export default function ImageManager({ onClose }: ImageManagerProps) {
             <button
               onClick={handleDeleteSelected}
               disabled={selected.size === 0}
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-cream hover:text-coral disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-cream hover:text-burgundy disabled:cursor-not-allowed disabled:opacity-50"
               title="删除选中的图片"
             >
               <Trash2 size={12} />
@@ -113,7 +113,7 @@ export default function ImageManager({ onClose }: ImageManagerProps) {
             <button
               onClick={handleCleanup}
               disabled={cleaning || unusedCount === 0}
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-cream hover:text-coral disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-cream hover:text-burgundy disabled:cursor-not-allowed disabled:opacity-50"
               title="清理未引用的图片"
             >
               <Trash2 size={12} />
@@ -143,7 +143,7 @@ export default function ImageManager({ onClose }: ImageManagerProps) {
               <div className="flex items-center gap-2 text-[10px] text-muted">
                 <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-cream">
                   <div
-                    className="h-full rounded-full bg-coral transition-all"
+                    className="h-full rounded-full bg-burgundy transition-all"
                     style={{ width: `${Math.min(100, (storageInfo.usage / storageInfo.quota) * 100)}%` }}
                   />
                 </div>
@@ -172,7 +172,7 @@ export default function ImageManager({ onClose }: ImageManagerProps) {
                     onClick={() => toggleSelect(ref)}
                     className={
                       "group relative cursor-pointer overflow-hidden rounded-md border bg-cream transition-all " +
-                      (isSel ? "border-coral ring-1 ring-coral" : "border-border hover:border-coral/40")
+                      (isSel ? "border-burgundy ring-1 ring-burgundy" : "border-border hover:border-burgundy/40")
                     }
                     title={ref}
                   >
@@ -199,7 +199,7 @@ export default function ImageManager({ onClose }: ImageManagerProps) {
                     <span
                       className={
                         "absolute left-1 top-1 flex h-4 w-4 items-center justify-center rounded border text-[8px] " +
-                        (isSel ? "border-coral bg-coral text-white" : "border-border bg-card/80 text-transparent")
+                        (isSel ? "border-burgundy bg-burgundy text-white" : "border-border bg-card/80 text-transparent")
                       }
                     >
                       ✓

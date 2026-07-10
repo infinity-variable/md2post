@@ -116,7 +116,7 @@ const PageCard = forwardRef<HTMLDivElement, PageCardProps>(({ page, settings, to
               style={{
                 top: 73,
                 height: 1,
-                background: `repeating-linear-gradient(90deg, var(--color-coral) 0, var(--color-coral) 4px, transparent 4px, transparent 8px)`,
+                background: `repeating-linear-gradient(90deg, var(--color-burgundy) 0, var(--color-burgundy) 4px, transparent 4px, transparent 8px)`,
               }}
             />
             {/* 底部辅助线：距离底部 73px */}
@@ -125,7 +125,7 @@ const PageCard = forwardRef<HTMLDivElement, PageCardProps>(({ page, settings, to
               style={{
                 bottom: 73,
                 height: 1,
-                background: `repeating-linear-gradient(90deg, var(--color-coral) 0, var(--color-coral) 4px, transparent 4px, transparent 8px)`,
+                background: `repeating-linear-gradient(90deg, var(--color-burgundy) 0, var(--color-burgundy) 4px, transparent 4px, transparent 8px)`,
               }}
             />
           </>
@@ -142,7 +142,7 @@ const PageCard = forwardRef<HTMLDivElement, PageCardProps>(({ page, settings, to
                 ?.querySelector('.page-card') as HTMLElement;
               if (pageCardEl) onExportSingle(page, pageCardEl);
             }}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-cream hover:text-coral"
+            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-cream hover:text-burgundy"
             title="导出此页"
           >
             <Download size={12} />
@@ -169,7 +169,7 @@ const PageCard = forwardRef<HTMLDivElement, PageCardProps>(({ page, settings, to
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setEditingImg((prev) => prev ? { ...prev, width: Math.max(20, prev.width - 20) } : null)}
-                className="flex h-7 w-7 items-center justify-center rounded border border-border text-muted hover:border-coral/40 hover:text-coral"
+                className="flex h-7 w-7 items-center justify-center rounded border border-border text-muted hover:border-burgundy/40 hover:text-burgundy"
               >-20</button>
               <input
                 type="text"
@@ -180,12 +180,12 @@ const PageCard = forwardRef<HTMLDivElement, PageCardProps>(({ page, settings, to
                   if (!isNaN(v) && v > 0)
                     setEditingImg((prev) => prev ? { ...prev, width: v } : null);
                 }}
-                className="h-7 w-16 rounded border border-border bg-card px-2 text-center font-mono text-xs text-ink outline-none focus:border-coral"
+                className="h-7 w-16 rounded border border-border bg-card px-2 text-center font-mono text-xs text-ink outline-none focus:border-burgundy"
               />
               <span className="text-[10px] text-muted">px</span>
               <button
                 onClick={() => setEditingImg((prev) => prev ? { ...prev, width: Math.min(settings.width, prev.width + 20) } : null)}
-                className="flex h-7 w-7 items-center justify-center rounded border border-border text-muted hover:border-coral/40 hover:text-coral"
+                className="flex h-7 w-7 items-center justify-center rounded border border-border text-muted hover:border-burgundy/40 hover:text-burgundy"
               >+20</button>
             </div>
             <label className="mt-2 flex items-center gap-1.5 text-[11px] text-muted">
@@ -193,7 +193,7 @@ const PageCard = forwardRef<HTMLDivElement, PageCardProps>(({ page, settings, to
                 type="checkbox"
                 checked={editingImg.edge}
                 onChange={(e) => setEditingImg((prev) => prev ? { ...prev, edge: e.target.checked, center: false } : null)}
-                className="h-3 w-3 accent-coral"
+                className="h-3 w-3 accent-burgundy"
               />
               突破页边距（铺满页面宽度）
             </label>
@@ -202,13 +202,13 @@ const PageCard = forwardRef<HTMLDivElement, PageCardProps>(({ page, settings, to
                 type="checkbox"
                 checked={editingImg.center}
                 onChange={(e) => setEditingImg((prev) => prev ? { ...prev, center: e.target.checked, edge: false } : null)}
-                className="h-3 w-3 accent-coral"
+                className="h-3 w-3 accent-burgundy"
               />
               居中（保留页边距水平居中）
             </label>
             <div className="mt-2 flex justify-end gap-2">
               <button onClick={handleWidthCancel} className="rounded-md px-3 py-1 text-xs text-muted hover:bg-cream">取消</button>
-              <button onClick={handleWidthConfirm} className="rounded-md bg-coral px-3 py-1 text-xs text-white hover:bg-coralDark">确定</button>
+              <button onClick={handleWidthConfirm} className="rounded-md bg-burgundy px-3 py-1 text-xs text-white hover:bg-ancora">确定</button>
             </div>
           </div>
         </div>

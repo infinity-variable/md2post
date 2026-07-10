@@ -9,7 +9,7 @@ import {
   type Theme,
 } from "@/types";
 import { exportSettings, importSettingsFromFile } from "@/lib/settingsIO";
-import { Settings as SettingsIcon, RotateCcw, Minus, Plus, Pencil, Trash2, Save, Download, Upload, ChevronDown, ChevronRight } from "lucide-react";
+import { Settings as SettingsIcon, RotateCcw, Minus, Plus, Pencil, Trash2, Save, Download, Upload, PanelRightClose } from "lucide-react";
 
 /**
  * 格式化数字显示：整数显示整数，小数去掉尾部 0
@@ -72,10 +72,10 @@ function NumRow({ label, value, min, max, step, unit = "", decimals = 1, emptyFa
 
   return (
     <div className="flex items-center gap-2">
-      <span className="w-16 shrink-0 text-[11px] text-muted">{label}</span>
+      <span className="w-16 text-[11px] text-muted">{label}</span>
       <button
         onClick={() => adjust(-step)}
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border bg-card text-muted transition hover:border-coral/40 hover:text-coral"
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border bg-card text-muted transition hover:border-burgundy/40 hover:text-burgundy"
       >
         <Minus size={10} />
       </button>
@@ -90,7 +90,7 @@ function NumRow({ label, value, min, max, step, unit = "", decimals = 1, emptyFa
             setFocused(false);
             commit(e.target.value);
           }}
-          className="h-6 w-full rounded border border-border bg-card pr-6 text-center font-mono text-[11px] text-ink outline-none focus:border-coral"
+          className="h-6 w-full rounded border border-border bg-card pr-6 text-center font-mono text-[11px] text-ink outline-none focus:border-burgundy"
         />
         {unit && (
           <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-muted">
@@ -100,7 +100,7 @@ function NumRow({ label, value, min, max, step, unit = "", decimals = 1, emptyFa
       </div>
       <button
         onClick={() => adjust(step)}
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border bg-card text-muted transition hover:border-coral/40 hover:text-coral"
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border bg-card text-muted transition hover:border-burgundy/40 hover:text-burgundy"
       >
         <Plus size={10} />
       </button>
@@ -121,8 +121,6 @@ function ColorRow({ label, value, onChange }: ColorRowProps) {
     if (v && !v.startsWith("#")) v = "#" + v;
     if (v.length <= 7) onChange(v.toUpperCase());
   };
-  // 自适应宽度：根据内容长度计算 ch 宽度
-  const inputWidth = `${Math.max(value.length, 4) + 15}ch`;
   return (
     <div className="flex items-center gap-2">
       <span className="w-16 shrink-0 text-[11px] text-muted">{label}</span>
@@ -134,8 +132,7 @@ function ColorRow({ label, value, onChange }: ColorRowProps) {
         type="text"
         value={value}
         onChange={handleInput}
-        style={{ width: inputWidth }}
-        className="h-6 rounded border border-border bg-card px-2 font-mono text-[11px] uppercase text-ink outline-none focus:border-coral"
+        className="h-6 min-w-0 flex-1 rounded border border-border bg-card px-2 font-mono text-[11px] uppercase text-ink outline-none focus:border-burgundy"
         maxLength={7}
       />
     </div>
@@ -165,7 +162,7 @@ function ThemeEditor({
               type="text"
               value={draft.name}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-              className="h-6 flex-1 rounded border border-border bg-card px-2 text-[11px] text-ink outline-none focus:border-coral"
+              className="h-6 flex-1 rounded border border-border bg-card px-2 text-[11px] text-ink outline-none focus:border-burgundy"
             />
           </div>
           <ColorRow label="主文本" value={draft.settings.textColor} onChange={(v) => setDraft({ ...draft, settings: { ...draft.settings, textColor: v } })} />
@@ -177,7 +174,7 @@ function ThemeEditor({
         </div>
         <div className="mt-3 flex justify-end gap-2">
           <button onClick={onCancel} className="rounded-md px-3 py-1 text-xs text-muted hover:bg-cream">取消</button>
-          <button onClick={() => onSave(draft)} className="flex items-center gap-1 rounded-md bg-coral px-3 py-1 text-xs text-white hover:bg-coralDark">
+          <button onClick={() => onSave(draft)} className="flex items-center gap-1 rounded-md bg-burgundy px-3 py-1 text-xs text-white hover:bg-ancora">
             <Save size={10} /> 保存
           </button>
         </div>
@@ -187,7 +184,7 @@ function ThemeEditor({
 }
 
 /* ── 设置面板 ── */
-export default function SettingsPanel() {
+export default function SettingsPanel({ onCollapse }: { onCollapse?: () => void }) {
   const settings = useStore((s) => s.settings);
   const setSizePreset = useStore((s) => s.setSizePreset);
   const setSettings = useStore((s) => s.setSettings);
@@ -200,7 +197,6 @@ export default function SettingsPanel() {
   const importConfig = useStore((s) => s.importConfig);
 
   const [editingTheme, setEditingTheme] = useState<Theme | null>(null);
-  const [showSyntaxHelp, setShowSyntaxHelp] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = () => {
@@ -271,42 +267,18 @@ export default function SettingsPanel() {
     <div className="flex h-full flex-col bg-card">
       <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
         <div className="flex items-center gap-2 text-ink">
-          <SettingsIcon size={16} className="text-coral" />
+          <SettingsIcon size={16} className="text-burgundy" />
           <span className="font-serif text-sm font-semibold">样式</span>
         </div>
-        <div className="flex items-center gap-1">
+        {onCollapse && (
           <button
-            onClick={handleImportClick}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-cream hover:text-coral"
-            title="导入参数"
+            onClick={onCollapse}
+            className="flex items-center justify-center rounded-md p-1 text-muted transition-colors hover:bg-cream hover:text-burgundy"
+            title="收起样式"
           >
-            <Upload size={12} />
-            导入
+            <PanelRightClose size={16} />
           </button>
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-cream hover:text-coral"
-            title="导出参数"
-          >
-            <Download size={12} />
-            导出
-          </button>
-          <button
-            onClick={resetSettings}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-cream hover:text-ink"
-            title="恢复默认设置"
-          >
-            <RotateCcw size={12} />
-            重置
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="application/json,.json"
-            onChange={handleImportFile}
-            className="hidden"
-          />
-        </div>
+        )}
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
@@ -322,7 +294,7 @@ export default function SettingsPanel() {
                   onClick={() => setSizePreset(p)}
                   className={
                     "rounded-lg border px-2 py-2 text-center transition-all " +
-                    (active ? "border-coral bg-coral/5 text-ink shadow-sm" : "border-border bg-card text-muted hover:border-coral/40 hover:text-ink")
+                    (active ? "border-burgundy bg-burgundy/5 text-ink shadow-sm" : "border-border bg-card text-muted hover:border-burgundy/40 hover:text-ink")
                   }
                 >
                   <div className="font-serif text-sm font-semibold">{p}</div>
@@ -333,12 +305,12 @@ export default function SettingsPanel() {
           </div>
           {/* 辅助线开关（仅 3:5 尺寸时显示） */}
           {settings.sizePreset === "3:5" && (
-            <label className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card px-2 py-1.5 text-[11px] text-muted transition hover:border-coral/40">
+            <label className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card px-2 py-1.5 text-[11px] text-muted transition hover:border-burgundy/40">
               <input
                 type="checkbox"
                 checked={settings.showGuideLines}
                 onChange={(e) => setSettings({ showGuideLines: e.target.checked })}
-                className="h-3.5 w-3.5 accent-coral"
+                className="h-3.5 w-3.5 accent-burgundy"
               />
               显示辅助线（第一页 73px 处）
             </label>
@@ -353,7 +325,7 @@ export default function SettingsPanel() {
             主题
             <button
               onClick={handleSaveCurrentAsTheme}
-              className="flex h-5 w-5 items-center justify-center rounded border border-border text-muted transition hover:border-coral/40 hover:text-coral"
+              className="flex h-5 w-5 items-center justify-center rounded border border-border text-muted transition hover:border-burgundy/40 hover:text-burgundy"
               title="保存当前设置为新主题"
             >
               <Plus size={10} />
@@ -369,7 +341,7 @@ export default function SettingsPanel() {
                     onClick={() => applyTheme(t)}
                     className={
                       "flex items-center gap-1.5 rounded-lg border px-2 py-1.5 transition-all " +
-                      (active ? "border-coral bg-coral/5 shadow-sm" : "border-border bg-card hover:border-coral/40")
+                      (active ? "border-burgundy bg-burgundy/5 shadow-sm" : "border-border bg-card hover:border-burgundy/40")
                     }
                   >
                     <div className="flex gap-0.5">
@@ -384,14 +356,14 @@ export default function SettingsPanel() {
                     <div className="absolute -right-1 -top-1 hidden gap-0.5 group-hover:flex">
                       <button
                         onClick={() => setEditingTheme(t)}
-                        className="flex h-4 w-4 items-center justify-center rounded-full border border-border bg-card text-muted hover:text-coral"
+                        className="flex h-4 w-4 items-center justify-center rounded-full border border-border bg-card text-muted hover:text-burgundy"
                         title="编辑主题"
                       >
                         <Pencil size={8} />
                       </button>
                       <button
                         onClick={() => deleteCustomTheme(t.id)}
-                        className="flex h-4 w-4 items-center justify-center rounded-full border border-border bg-card text-muted hover:text-coral"
+                        className="flex h-4 w-4 items-center justify-center rounded-full border border-border bg-card text-muted hover:text-burgundy"
                         title="删除主题"
                       >
                         <Trash2 size={8} />
@@ -418,7 +390,7 @@ export default function SettingsPanel() {
                   onClick={() => setSettings({ fontFamily: f })}
                   className={
                     "flex h-7 items-center justify-center rounded-lg border px-1.5 text-center transition-all " +
-                    (active ? "border-coral bg-coral/5 text-ink shadow-sm" : "border-border bg-card text-muted hover:border-coral/40 hover:text-ink")
+                    (active ? "border-burgundy bg-burgundy/5 text-ink shadow-sm" : "border-border bg-card text-muted hover:border-burgundy/40 hover:text-ink")
                   }
                   style={{ fontFamily: (FONT_OPTIONS[f] ?? FONT_OPTIONS.sans).value }}
                 >
@@ -458,49 +430,41 @@ export default function SettingsPanel() {
           <ColorRow label="代码" value={settings.codeColor} onChange={(v) => setSettings({ codeColor: v })} />
           <ColorRow label="代码背景" value={settings.codeBgColor} onChange={(v) => setSettings({ codeBgColor: v })} />
         </div>
+      </div>
 
-        <div className="h-px bg-border" />
-
-        {/* 特殊语法说明 */}
-        <div className="rounded-lg bg-cream p-2.5">
-          <button
-            onClick={() => setShowSyntaxHelp((v) => !v)}
-            className="mb-1.5 flex items-center gap-1 text-[11px] font-medium text-ink transition-colors hover:text-coral"
-            title={showSyntaxHelp ? "收起特殊语法说明" : "展开特殊语法说明"}
-          >
-            {showSyntaxHelp ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-            特殊语法说明
-          </button>
-          {showSyntaxHelp && (
-            <>
-              <ul className="space-y-0.5 text-[10px] leading-relaxed text-muted">
-                <li><b className="text-ink">空行</b> 双回车</li>
-                <li><b className="text-ink">正文块</b> {"<>正文"}</li>
-                <li><b className="text-ink">实线</b> ***</li>
-                <li><b className="text-ink">虚线</b> ---</li>
-                <li><b className="text-ink">图片</b> ![说明|宽度](URL)</li>
-              </ul>
-              <div className="mt-2 flex flex-col gap-1">
-                <a
-                  href="https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[10px] text-coral hover:underline"
-                >
-                  Markdown 语法参考 →
-                </a>
-                <a
-                  href="https://xhslink.com/m/6I6pbFn5aWa"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[10px] text-coral hover:underline"
-                >
-                  建议与反馈 →
-                </a>
-              </div>
-            </>
-          )}
-        </div>
+      {/* 底部工具栏：导入、导出、重置 */}
+      <div className="flex items-center justify-center gap-1 border-t border-border bg-cream/60 px-3 py-2">
+        <button
+          onClick={handleImportClick}
+          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-card hover:text-burgundy"
+          title="导入参数"
+        >
+          <Upload size={12} />
+          导入
+        </button>
+        <button
+          onClick={handleExport}
+          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-card hover:text-burgundy"
+          title="导出参数"
+        >
+          <Download size={12} />
+          导出
+        </button>
+        <button
+          onClick={resetSettings}
+          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-card hover:text-ink"
+          title="恢复默认设置"
+        >
+          <RotateCcw size={12} />
+          重置
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          onChange={handleImportFile}
+          className="hidden"
+        />
       </div>
 
       {/* 主题编辑弹窗 */}

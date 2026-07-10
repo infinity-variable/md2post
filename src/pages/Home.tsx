@@ -8,6 +8,7 @@ import { usePagination } from "@/hooks/usePagination";
 import { useStore } from "@/store";
 import { saveImageToStore } from "@/lib/imageStore";
 import { processImageFiles } from "@/lib/imageInsert";
+import { PanelLeftOpen, PanelRightOpen } from "lucide-react";
 
 const DEFAULT_LEFT_WIDTH = 360;
 const DEFAULT_RIGHT_WIDTH = 280;
@@ -42,7 +43,7 @@ export default function Home() {
       const base = import.meta.env.BASE_URL;
       const defaultImages: Record<string, string> = {
         img_cat_qavr: `${base}default-cat.png`,
-        "img_插图_7j65": `${base}default-insert.png`,
+        img_insert_kk8n: `${base}default-insert.png`,
       };
       for (const [ref, url] of Object.entries(defaultImages)) {
         if (!images[ref]) {
@@ -83,6 +84,38 @@ export default function Home() {
       return DEFAULT_RIGHT_WIDTH;
     }
   });
+
+  // 面板收起状态
+  const [editorCollapsed, setEditorCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem("md2post-editor-collapsed") === "true";
+    } catch {
+      return false;
+    }
+  });
+  const [settingsCollapsed, setSettingsCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem("md2post-settings-collapsed") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleEditor = useCallback(() => {
+    setEditorCollapsed((prev) => {
+      const next = !prev;
+      try { localStorage.setItem("md2post-editor-collapsed", String(next)); } catch {}
+      return next;
+    });
+  }, []);
+
+  const toggleSettings = useCallback(() => {
+    setSettingsCollapsed((prev) => {
+      const next = !prev;
+      try { localStorage.setItem("md2post-settings-collapsed", String(next)); } catch {}
+      return next;
+    });
+  }, []);
 
   const draggingRef = useRef<"left" | "right" | null>(null);
   const startXRef = useRef(0);
@@ -198,37 +231,64 @@ export default function Home() {
       <Toolbar pages={pages} />
       <div className="flex min-h-0 flex-1">
         {/* 左侧编辑器 */}
-        <aside style={{ width: leftWidth }} className="shrink-0 border-r border-border overflow-hidden">
-          <Editor />
-        </aside>
+        {editorCollapsed ? (
+          <button
+            onClick={toggleEditor}
+            className="flex w-7 shrink-0 flex-col items-center justify-center border-r border-border bg-card py-3 text-muted transition-colors hover:bg-cream hover:text-burgundy"
+            title="展开编辑器"
+          >
+            <PanelLeftOpen size={16} />
+          </button>
+        ) : (
+          <aside
+            style={settingsCollapsed ? { flex: "1 1 0%" } : { width: leftWidth }}
+            className={settingsCollapsed ? "min-w-0 border-r border-border overflow-hidden" : "shrink-0 border-r border-border overflow-hidden"}
+          >
+            <Editor onCollapse={toggleEditor} />
+          </aside>
+        )}
 
-        {/* 左侧拖拽分割条 */}
-        <div
-          className={`resize-handle${draggingRef.current === "left" ? " active" : ""}`}
-          onMouseDown={handleMouseDown("left")}
-        />
+        {/* 左侧拖拽分割条：编辑器和样式都展开时才显示 */}
+        {!editorCollapsed && !settingsCollapsed && (
+          <div
+            className={`resize-handle${draggingRef.current === "left" ? " active" : ""}`}
+            onMouseDown={handleMouseDown("left")}
+          />
+        )}
 
         {/* 中间预览区 */}
         <main className="flex min-w-0 flex-1 flex-col bg-cream">
           <Preview pages={pages} settings={settings} />
         </main>
 
-        {/* 右侧拖拽分割条 */}
-        <div
-          className={`resize-handle${draggingRef.current === "right" ? " active" : ""}`}
-          onMouseDown={handleMouseDown("right")}
-        />
+        {/* 右侧拖拽分割条：样式展开时才显示 */}
+        {!settingsCollapsed && (
+          <div
+            className={`resize-handle${draggingRef.current === "right" ? " active" : ""}`}
+            onMouseDown={handleMouseDown("right")}
+          />
+        )}
 
         {/* 右侧设置面板 */}
-        <aside style={{ width: rightWidth }} className="shrink-0 border-l border-border overflow-hidden">
-          <SettingsPanel />
-        </aside>
+        {settingsCollapsed ? (
+          <button
+            onClick={toggleSettings}
+            className="flex w-7 shrink-0 flex-col items-center justify-center border-l border-border bg-card py-3 text-muted transition-colors hover:bg-cream hover:text-burgundy"
+            title="展开样式"
+          >
+            <PanelRightOpen size={16} />
+          </button>
+        ) : (
+          <aside style={{ width: rightWidth }} className="shrink-0 border-l border-border overflow-hidden">
+            <SettingsPanel onCollapse={toggleSettings} />
+          </aside>
+        )}
       </div>
 
       {isDragOver && (
-        <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-coral/10">
-          <div className="rounded-xl border-2 border-dashed border-coral bg-card/90 px-8 py-6 text-center shadow-lg">
-            <div className="font-serif text-base font-semibold text-coral">松开以插入</div>
+        <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-burgundy/10">
+          <div className="rounded-xl border-2 border-dashed border-burgundy bg-card/90 px-8 py-6 text-center shadow-lg">
+            <div className="font-serif text-base font-semibold text-burgundy">松开以插入</div>
             <div className="mt-1 text-xs text-muted">文本 / 图片</div>
           </div>
         </div>

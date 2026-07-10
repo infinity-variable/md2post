@@ -21,7 +21,7 @@ export default function Toolbar({ pages }: ToolbarProps) {
   return (
     <header className="flex h-14 items-center justify-between border-b border-border bg-card px-5">
       <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-coral text-white shadow-sm">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-burgundy text-white shadow-sm">
           <svg width="16" height="16" viewBox="0 0 48 48" fill="none" aria-hidden="true">
             <path d="M31 21L35 18L44 24V34L34 40L24 34V13L13 7L4 13V24L13 30L17 27" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -51,7 +51,7 @@ export default function Toolbar({ pages }: ToolbarProps) {
         <button
           onClick={handleExportAll}
           disabled={isExporting || pages.length === 0}
-          className="flex items-center gap-2 rounded-lg bg-coral px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-coralDark hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex items-center gap-2 rounded-lg bg-burgundy px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-ancora hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isExporting ? (
             <>

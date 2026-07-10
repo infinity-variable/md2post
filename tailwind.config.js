@@ -11,8 +11,8 @@ export default {
       colors: {
         cream: "#FAF7F2",
         ink: "#1A1A1A",
-        coral: "#ff4d4f",
-        coralDark: "#E63946",
+        burgundy: "#81021f",
+        ancora: "#4a0b1c",
         border: "#E8E4DC",
         card: "#FFFFFF",
         muted: "#6B6B6B",
