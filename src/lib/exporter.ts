@@ -179,12 +179,11 @@ async function fetchFontCSS(settings: Settings): Promise<string> {
 /**
  * SVG 导出布局修复 CSS
  * 修复 SVG foreignObject 沙盒中与浏览器渲染的微小差异：
- * - .note-text 的 inline-block 导致末尾换行 → 改为 block
- * - inline-block 的 baseline 间隙 → vertical-align: top
+ * - .note-text 的 inline-block 导致末尾换行 → 改为 block + nowrap
  */
 const LAYOUT_FIX_CSS = `
-.page-content .note-text{display:block;vertical-align:top;}
-.page-content blockquote .note-text{display:block;}
+.page-content .note-text{display:block;white-space:nowrap;}
+.page-content blockquote .note-text{display:block;white-space:nowrap;}
 `;
 
 /**
